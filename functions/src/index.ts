@@ -1,19 +1,19 @@
 import functions = require("firebase-functions");
-import admin = require("firebase-admin");
+import { initializeApp } from "firebase-admin/app";
 import nodemailer = require("nodemailer");
-const { defineSecret } = require("firebase-functions/params");
+import { defineSecret } from "firebase-functions/params";
 const cors = require("cors")({ origin: true });
 
-const GMAIL_ACCOUNT: string = defineSecret("GMAIL_ACCOUNT");
-const GMAIL_PASS: string = defineSecret("GMAIL_PASS");
+const GMAIL_ACCOUNT = defineSecret("GMAIL_ACCOUNT");
+const GMAIL_PASS = defineSecret("GMAIL_PASS");
 
-admin.initializeApp();
+initializeApp();
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: GMAIL_ACCOUNT,
-    pass: GMAIL_PASS,
+    user: GMAIL_ACCOUNT.value(),
+    pass: GMAIL_PASS.value(),
   },
 });
 
@@ -34,7 +34,7 @@ exports.sendMail = functions.https.onRequest((req, res) => {
     }
 
     const mailOptions = {
-      from: GMAIL_ACCOUNT,
+      from: GMAIL_ACCOUNT.value(),
       to: destinationEmail,
       subject: "Hello!!!",
       html: `<h3 style="font-size: 16px;">Thanks for your request!!</h3>
