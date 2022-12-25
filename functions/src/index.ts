@@ -28,11 +28,11 @@ export const sendMail = functions
         valueIsEmpty(body.email) ||
         valueIsEmpty(body.message)
       ) {
-        return res.status(400).send("Fill all the parameters.");
+        return res.status(400).send({ error: "Fill all the parameters." });
       }
 
       if (!isValidEmail(body.email)) {
-        return res.status(400).send("Insert a valid email.");
+        return res.status(400).send({ error: "Insert a valid email." });
       }
 
       transporterLazyLoad(
@@ -59,9 +59,11 @@ export const sendMail = functions
         mailOptions,
         (error: { toString: () => any }, info: any) => {
           if (error) {
-            return res.status(500).send(error.toString());
+            return res.status(501).send({ error: error.toString(), error_message: info });
           }
-          return res.status(200).send("Email sent, I'll be in touch soon!!!");
+          return res
+            .status(200)
+            .send({ info: "Email sent, I'll be in touch soon!!!" });
         }
       );
     });
