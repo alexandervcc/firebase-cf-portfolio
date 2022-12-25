@@ -58,7 +58,7 @@ export const sendMail = functions
             error: "Something went wrong :(, please try again later. ",
           });
         } else {
-          res.status(300).send({
+          res.status(200).send({
             res: "Thanks for your message, I will contact you soon!!!.",
           });
         }
