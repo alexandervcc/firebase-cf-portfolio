@@ -17,21 +17,21 @@ export const sendMail = functions
     cors(req, res, () => {
       const method = req.method;
       if (method !== "POST") {
-        return res.send("Invalid method.");
+        return res.status(405).send({ error: "Method not allowed." });
       }
-      
+
       const { name, email, message } = req.body;
 
       if (
-        !checkPresentParameter(name) ||
-        !checkPresentParameter(email) ||
-        !checkPresentParameter(message)
+        checkPresentParameter(name) ||
+        checkPresentParameter(email) ||
+        checkPresentParameter(message)
       ) {
-        return res.send("Fill all the parameters.");
+        return res.status(400).send("Fill all the parameters.");
       }
 
       if (!isValidEmail(email)) {
-        return res.send("Insert a valid email.");
+        return res.status(400).send("Insert a valid email.");
       }
 
       transporterLazyLoad(
@@ -54,12 +54,15 @@ export const sendMail = functions
             `,
       };
 
-      return transporter.sendMail(mailOptions, (error: { toString: () => any; }, info: any) => {
-        if (error) {
-          return res.send(error.toString()  );
+      return transporter.sendMail(
+        mailOptions,
+        (error: { toString: () => any }, info: any) => {
+          if (error) {
+            return res.status(500).send(error.toString());
+          }
+          return res.status(200).send("Email sent, I'll be in touch soon!!!");
         }
-        return res.send("Email sent, I'll be in touch soon!!!");
-      });
+      );
     });
   });
 
@@ -68,8 +71,8 @@ const isValidEmail = (email: string): boolean => {
   return expression.test(email);
 };
 
-const checkPresentParameter = (val?: string) => {
-  return val === null || val === undefined || val.length === 0;
+const checkPresentParameter = (val: string) => {
+  return val === null || val.length === 0;
 };
 
 const transporterLazyLoad = (transporter: any, email: string, pass: string) => {
