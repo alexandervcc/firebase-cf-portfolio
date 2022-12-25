@@ -2,6 +2,7 @@ import functions = require("firebase-functions");
 import { initializeApp } from "firebase-admin/app";
 import nodemailer = require("nodemailer");
 import { defineSecret } from "firebase-functions/params";
+import { RequestBody } from "./body";
 const cors = require("cors")({ origin: true });
 
 const GMAIL_ACCOUNT = defineSecret("GMAIL_ACCOUNT");
@@ -20,17 +21,17 @@ export const sendMail = functions
         return res.status(405).send({ error: "Method not allowed." });
       }
 
-      const { name, email, message } = req.body;
+      const body = req.body as RequestBody;
 
       if (
-        checkPresentParameter(name) ||
-        checkPresentParameter(email) ||
-        checkPresentParameter(message)
+        valueIsEmpty(body.name) ||
+        valueIsEmpty(body.email) ||
+        valueIsEmpty(body.message)
       ) {
         return res.status(400).send("Fill all the parameters.");
       }
 
-      if (!isValidEmail(email)) {
+      if (!isValidEmail(body.email)) {
         return res.status(400).send("Insert a valid email.");
       }
 
@@ -42,14 +43,14 @@ export const sendMail = functions
 
       const mailOptions = {
         from: GMAIL_ACCOUNT.value(),
-        to: email,
+        to: GMAIL_ACCOUNT.value(),
         subject: "New contact!!!",
         html: `<h3 style="font-size: 16px;">Portfolio Contact!</h3>
-                <p>Name: ${name}</p>
+                <p>Name: ${body.name}</p>
                 <br />
-                <p>Email: ${email}</p>
+                <p>Email: ${body.email}</p>
                 <br />
-                <p>Message: ${message}</p>
+                <p>Message: ${body.message}</p>
                 <br />
             `,
       };
@@ -71,8 +72,8 @@ const isValidEmail = (email: string): boolean => {
   return expression.test(email);
 };
 
-const checkPresentParameter = (val: string) => {
-  return val === null || val.length === 0;
+const valueIsEmpty = (val: string) => {
+  return val === null || val === undefined;
 };
 
 const transporterLazyLoad = (transporter: any, email: string, pass: string) => {
