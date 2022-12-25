@@ -35,11 +35,15 @@ export const sendMail = functions
         return res.status(400).send({ error: "Insert a valid email." });
       }
 
-      transporterLazyLoad(
-        transporter,
-        GMAIL_ACCOUNT.value(),
-        GMAIL_PASS.value()
-      );
+      try {
+        transporterLazyLoad(
+          transporter,
+          GMAIL_ACCOUNT.value(),
+          GMAIL_PASS.value()
+        );
+      } catch (error) {
+        return res.status(500).send({ error: error });
+      }
 
       const mailOptions = {
         from: GMAIL_ACCOUNT.value(),
@@ -59,7 +63,9 @@ export const sendMail = functions
         mailOptions,
         (error: { toString: () => any }, info: any) => {
           if (error) {
-            return res.status(501).send({ error: error.toString(), error_message: info });
+            return res
+              .status(501)
+              .send({ error: error.toString(), error_message: info });
           }
           return res
             .status(200)
