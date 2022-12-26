@@ -16,7 +16,7 @@ export const sendMail = functions
   .https.onRequest((req, res) => {
     cors(req, res, () => {
       if (req.method !== "POST") {
-        return res.status(405).send({ error: "Method not allowed." });
+        return res.status(405).send({ message: "Method not allowed." });
       }
 
       const body = req.body as RequestBody;
@@ -26,11 +26,11 @@ export const sendMail = functions
         valueIsEmpty(body.email) ||
         valueIsEmpty(body.message)
       ) {
-        return res.status(400).send({ error: "Fill all the parameters." });
+        return res.status(400).send({ message: "Fill all the parameters." });
       }
 
       if (!isValidEmail(body.email)) {
-        return res.status(400).send({ error: "Insert a valid email." });
+        return res.status(400).send({ message: "Insert a valid email." });
       }
 
       const mailOptions = {
@@ -55,11 +55,11 @@ export const sendMail = functions
       return transporter.sendMail(mailOptions, (error: any, info: any) => {
         if (error) {
           res.status(500).send({
-            error: "Something went wrong :(, please try again later. ",
+            message: "Something went wrong :(, please try again later. ",
           });
         } else {
           res.status(200).send({
-            res: "Thanks for your message, I will contact you soon!!!.",
+            message: "Thanks for your message, I will contact you soon!!!.",
           });
         }
       });
